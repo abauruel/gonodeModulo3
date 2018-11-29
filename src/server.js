@@ -1,6 +1,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const databaseConfig = require('./config/database')
+const validate = require('express-validation')
+const Youch = require('youch')
 class App {
   constructor () {
     this.express = express()
@@ -9,6 +11,7 @@ class App {
     this.database()
     this.middleware()
     this.routes()
+    this.exception()
   }
 
   database () {
@@ -27,6 +30,23 @@ class App {
 
   routes () {
     this.express.use(require('./routes'))
+  }
+  exception () {
+    this.express.use(async (err, req, res, next) => {
+      if (err instanceof validate.ValidationError) {
+        return res.status(err.status).json(err)
+      }
+
+      if (process.env.NODE_ENV !== 'production') {
+        const youch = new Youch(err)
+
+        return res.json(await youch.toJson())
+      }
+
+      return res
+        .status(err.status || 500)
+        .json({ error: 'Internal Server erro ' })
+    })
   }
 }
 
