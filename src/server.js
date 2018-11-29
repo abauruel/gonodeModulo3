@@ -4,6 +4,8 @@ const databaseConfig = require('./config/database')
 const validate = require('express-validation')
 const Youch = require('youch')
 
+require('dotenv').config()
+
 const sentryConfig = require('./config/sentry')
 const Sentry = require('@sentry/node')
 
